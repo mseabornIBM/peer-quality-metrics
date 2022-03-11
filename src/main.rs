@@ -30,7 +30,7 @@ fn get_quality_metric() -> f64 {
     let mut qm = 0_f64;
     for metric in qm_matrix {
         qm = qm + (metric.value * metric.weight);
-        println!("Processing Code: {} with Quality Value: {} and Weight:{}", code_to_string(metric.code), metric.value, metric.weight);
+        println!("Processing Code: {} with Quality Value: {} and Weight: {}", code_to_string(metric.code), metric.value, metric.weight);
     }
     qm
 }
