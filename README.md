@@ -1,1 +1,1 @@
-This is a prototype to flesh out a peer quality metric that can be used in pyrsia to help determine the "best" peer to choose and artfact from.
+This is a prototype to flesh out a peer quality metric that can be used in pyrsia to help determine the "best" peer to choose and artifact from.
