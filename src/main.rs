@@ -115,6 +115,8 @@ extern crate more_asserts;
 mod tests{
     use super::*;
 
+    const CPU_THREADS: usize = 100;
+
     #[test]
     fn cpu_load_test(){
         use sysinfo::{System, SystemExt};
@@ -127,7 +129,6 @@ mod tests{
         let mut sys = System::new_all();
         sys.refresh_all();
         let loading = Arc::new(AtomicBool::new(true));
-        let loading_test = loading.clone();
 
         let (sys, qm_matrix) = get_cpu_stress(sys, qm_matrix);
         let mut qm = 0_f64;
@@ -136,12 +137,17 @@ mod tests{
         }
         assert_ne!(0_f64,qm); //zero should never be returned here
 
-        let handle = thread::spawn(move|| {
-            let mut cpu_fire = 0;
-            while loading_test.load(Ordering::Relaxed) {
-                cpu_fire = cpu_fire + 1;
-            }
-        });
+        let mut threads = vec![];
+        for _i in 0..CPU_THREADS {
+            threads.push(thread::spawn({
+                let mut cpu_fire = 0;
+                let loading_test = loading.clone();
+                move || {
+                    while loading_test.load(Ordering::Relaxed) {
+                    cpu_fire = cpu_fire + 1;
+                }}
+            }));
+        }
 
         thread::sleep(Duration::from_millis(2000)); //let cpu spin up
         let qm2_matrix = Vec::<MetricElement>::new();
@@ -155,6 +161,10 @@ mod tests{
 
         assert_gt!(qm2, qm);
         loading.store(false, Ordering::Relaxed);  //kill thread
-        handle.join().unwrap();                   //wait for thread
+
+        //wait for thread
+        for thread in threads{
+            thread.join().unwrap();
+        }                   
     }
 }
