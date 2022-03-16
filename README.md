@@ -6,3 +6,4 @@ This is a prototype to flesh out a peer quality metric that can be used in pyrsi
 | CPU Load | The percentage of CPU load on the peer in question | 2 |
 | Network Load| The current number of packets in + current number of packets out | 0.001 |
  
+TODO: Need to mix in MTU size and network card bandwidth to the metric.
