@@ -1,4 +1,4 @@
-use sysinfo::{System, SystemExt, ProcessExt, Networks, NetworkExt};
+use sysinfo::{System, SystemExt, ProcessExt, NetworkExt};
 
 //investigate stats that can be used here.
 // std::io::net;
@@ -27,7 +27,7 @@ fn get_quality_metric() -> f64 {
 
     let (sys, qm_matrix) = get_cpu_stress(sys, qm_matrix);
     let (sys, qm_matrix)  = get_network_stress(sys, qm_matrix);
-    let (sys, qm_matrix)  = get_disk_stress(sys, qm_matrix);
+    let (_sys, qm_matrix)  = get_disk_stress(sys, qm_matrix);
 
     let mut qm = 0_f64;
     for metric in qm_matrix {
@@ -59,7 +59,7 @@ fn get_network_stress(mut sys: System, mut quality_matrix: Vec::<MetricElement>)
 
     let mut packets_in = 0;
     let mut packets_out = 0;
-    for (interface_name, network) in networks {
+    for (_interface_name, network) in networks {
         packets_in = packets_in + network.received();
         packets_out = packets_out + network.transmitted();
     }
@@ -76,37 +76,13 @@ fn get_network_stress(mut sys: System, mut quality_matrix: Vec::<MetricElement>)
     (sys, quality_matrix)
 }
 
-
 fn get_disk_stress(mut sys: System, mut quality_matrix: Vec::<MetricElement>) -> (System, Vec<MetricElement>) {
-    //use systemstat::{System, Platform, saturating_sub_bytes};
-    //let mut sys = System::new();
-
-    /*let stats = sys.block_device_statistics();
-    for blkstats in stats { 
-        println!("{:?}", blkstats);
-    }*/
 
     sys.refresh_all();
-    // We display all disks' information:
-    /*println!("=> disks:");
-    for disk in sys.disks() {
-        println!("{:?}", disk);
-    }
-    println!("\n");*/
-
-    /*match sys.block_device_statistics() {
-        Ok(stats) => {
-            for blkstats in stats.values() {
-                println!("{}: {:?}", blkstats.name, blkstats);
-            }
-        }
-        Err(x) => println!("\nBlock statistics error: {}", x.to_string())
-    }*/
 
     // Sum up the disk usage measured as read and writes per process:
     let mut total_usage = 0_u64;
-    for (pid, process) in sys.processes() {
-        //println!("[{}] {} {:?}", pid, process.name(), process.disk_usage());
+    for (_pid, process) in sys.processes() {
         let usage = process.disk_usage();
         total_usage = total_usage + usage.written_bytes + usage.read_bytes;
     }
@@ -132,7 +108,6 @@ fn code_to_string(code: i64) -> String {
     string_code
 }
 
-
 #[macro_use]
 extern crate more_asserts;
 
@@ -142,7 +117,7 @@ mod tests{
 
     #[test]
     fn cpu_load_test(){
-        use sysinfo::{System, SystemExt, Networks, NetworkExt};
+        use sysinfo::{System, SystemExt};
         use std::thread;
         use std::time::Duration;
         use std::sync::atomic::{AtomicBool, Ordering};
